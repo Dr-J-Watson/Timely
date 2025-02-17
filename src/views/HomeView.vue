@@ -29,7 +29,7 @@ export default {
       try {
         const store = useApiStore();
         store.setApiKey(this.user.key);
-        const response = await store.api.get('/api/profile');
+        const response = await store.apiInstance.get('/api/profile');
         this.$router.push({ name: 'menu'});
       } catch (error) {
         console.error("Erreur lors de la connexion : ", error.response?.data || error.message);

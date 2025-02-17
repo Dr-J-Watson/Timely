@@ -1,20 +1,37 @@
-import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import axios from 'axios';
 
-export const useApiStore = defineStore('api', () => {
-  const api = ref(null);
-  const setApiKey = (key) => {
-    api.value = axios.create({
-      baseURL: 'https://timely.edu.netlor.fr',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `key=${key}`,
+export const useApiStore = defineStore('api', {
+  state: () => ({
+    apiKey: '',  
+  }),
+  getters: {
+    apiInstance: (state) => {
+      if (!state.apiKey) return null;
+      return axios.create({
+        baseURL: 'https://timely.edu.netlor.fr',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `key=${state.apiKey}`,
+        },
+      });
+    },
+  },
+  actions: {
+    setApiKey(key) {
+      this.apiKey = key;
+    },
+    removeApiKey() {
+      this.apiKey = '';
+    },
+  },
+  persist: {
+    enabled: true,
+    strategies: [
+      {
+        key: 'apiKey',
+        storage: localStorage,
       },
-    });
-  };
-    return {
-      api,
-      setApiKey,
-    };
-  });
+    ],
+  },
+});

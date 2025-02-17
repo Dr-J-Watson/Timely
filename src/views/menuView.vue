@@ -8,6 +8,7 @@
             <button type="submit" @click="modifier">Modifier le compte</button>
         </form>
     </div>
+    <button @click="deconnexion">Déconnexion</button>
     <div>
         <label>Projets</label>
     </div>
@@ -33,18 +34,21 @@ export default {
         async modifier() {
             try {
                 const store = useApiStore();
-                console.log("key: "+store.key);
-                store.setApiKey(store.key);
-                if (!store.api) {
+                store.setApiKey(store.apiKey);
+                if (!store.apiInstance) {
                     throw new Error('L\'API n\'est pas initialisée');
                 }
-                console.log("Modification du compte : ", this.user);
-                console.log("key: "+store.key);
-                const response = await store.api.put('/api/profile', this.user);
-                console.log("Réponse API : ", response.data);
+                const response = store.apiInstance.put('/api/profile', this.user);
+                alert("Compte modifié avec succès");
             } catch (error) {
                 console.error("Erreur lors de la modification : ", error.response?.data || error.message);
+                alert("Erreur lors de la modification : " + error.response?.data?.message || error.message);
             }
+        },
+        deconnexion() {
+            const store = useApiStore();
+            store.removeApiKey();
+            this.$router.push('/');
         }
     }
 }
