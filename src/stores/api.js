@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export const useApiStore = defineStore('api', {
   state: () => ({
-    apiKey: '',  
+    apiKey: localStorage.getItem('apiKey') || '',
   }),
   getters: {
     apiInstance: (state) => {
@@ -20,9 +20,14 @@ export const useApiStore = defineStore('api', {
   actions: {
     setApiKey(key) {
       this.apiKey = key;
+      localStorage.setItem('apiKey', key);
     },
     removeApiKey() {
       this.apiKey = '';
+      localStorage.removeItem('apiKey');
+    },
+    isAuthenticated() {
+      return !!this.apiKey;
     },
   },
   persist: {

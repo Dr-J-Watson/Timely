@@ -1,14 +1,19 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import inscriptionView from '../views/inscriptionView.vue'
-import menuView from '../views/menuView.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import connexionView from '../views/connexionView.vue';
+import inscriptionView from '../views/inscriptionView.vue';
+import profilView from '../views/profilView.vue';
+import projectsView from '../views/projectsView.vue';
+import activitiesView from '../views/activitiesView.vue';
+import objectivesView from '../views/objectivesView.vue';
+import { useApiStore } from '@/stores/api';
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView,
+      name: 'connexion',
+      component: connexionView,
     },
     {
       path: '/inscription',
@@ -16,11 +21,38 @@ const router = createRouter({
       component: inscriptionView,
     },
     {
-      path: '/menu',
+      path: '/profil',
       name: 'menu',
-      component: menuView,
+      component: profilView,
+    },
+    {
+      path: '/projects',
+      name: 'projects',
+      component: projectsView,
+    },
+    {
+      path: '/activities',
+      name: 'activities',
+      component: activitiesView,
+    },
+    {
+      path: '/objectives',
+      name: 'objectives',
+      component: objectivesView,
     },
   ],
-})
+});
 
-export default router
+// tableau des routes autorisées sans authentification
+const allowedRoutes = ['connexion', 'inscription'];
+
+router.beforeEach((to, from, next) => {
+  const store = useApiStore();
+  if ( !store.isAuthenticated() && !allowedRoutes.includes(to.name) ) {
+    next({ name: 'connexion' });
+  } else {
+    next();
+  }
+});
+
+export default router;
