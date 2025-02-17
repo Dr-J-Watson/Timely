@@ -29,6 +29,5 @@ coverage
 
 *.tsbuildinfo
 
-vite.config.js
+.vite/
 package-lock.json
-package.json
