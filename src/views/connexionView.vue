@@ -1,4 +1,5 @@
 <template>
+  <Header />
   <div class="home-container">
     <h1>Accueil</h1>
     <form @submit.prevent="connexion" class="connexion-form">
@@ -15,6 +16,7 @@
 </template>
 
 <script>
+import Header from '@/components/header.vue';
 import { useApiStore } from '@/stores/api';
 import { useToast } from 'vue-toastification';
 
@@ -37,12 +39,15 @@ export default {
         store.setApiKey(this.user.key);
         const response = await store.apiInstance.get('/api/profile');
         toast.success("Connexion réussie !");
-        this.$router.push({ name: 'menu' });
+        this.$router.push({ name: 'statistics' });
       } catch (error) {
         console.error("Erreur lors de la connexion : ", error.response?.data || error.message);
         toast.error("Erreur lors de la connexion : " + (error.response?.data || error.message));
       }
     },
+  },
+  components: {
+      Header
   },
 };
 </script>

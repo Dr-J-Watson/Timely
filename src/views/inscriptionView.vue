@@ -1,4 +1,5 @@
 <template>
+    <Header />
     <div class="inscription-container">
         <h1>Inscription</h1>
         <form @submit.prevent="inscription" class="inscription-form">
@@ -27,6 +28,7 @@
 
 <script>
 import axios from 'axios';
+import Header from '@/components/header.vue';
 import { useApiStore } from '@/stores/api';
 import { useToast } from 'vue-toastification';
 
@@ -63,7 +65,10 @@ export default {
                 toast.error("Erreur lors de l'inscription : " + (error.response?.data || error.message));
             }
         }
-    }
+    },
+    components: {
+      Header
+    },
 };
 </script>
 

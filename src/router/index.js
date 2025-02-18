@@ -1,29 +1,30 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import connexionView from '../views/connexionView.vue';
 import inscriptionView from '../views/inscriptionView.vue';
-import profilView from '../views/profilView.vue';
+import settingsView from '../views/settingsView.vue';
 import projectsView from '../views/projectsView.vue';
 import activitiesView from '../views/activitiesView.vue';
 import objectivesView from '../views/objectivesView.vue';
+import statisticsView from '../views/statisticsView.vue';
 import { useApiStore } from '@/stores/api';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
+      path: '/login',
       name: 'connexion',
       component: connexionView,
     },
     {
-      path: '/inscription',
+      path: '/singup',
       name: 'inscription',
       component: inscriptionView,
     },
     {
-      path: '/profil',
-      name: 'menu',
-      component: profilView,
+      path: '/settings',
+      name: 'settings',
+      component: settingsView,
     },
     {
       path: '/projects',
@@ -39,6 +40,11 @@ const router = createRouter({
       path: '/objectives',
       name: 'objectives',
       component: objectivesView,
+    },
+    {
+      path: '/statistics',
+      name: 'statistics',
+      component: statisticsView,
     },
   ],
 });
