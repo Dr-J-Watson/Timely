@@ -44,7 +44,7 @@ export default {
     },
     methods: {
         connexion() {
-            this.$router.push({ name: 'home' });
+            this.$router.push({ name: 'connexion' });
         },
         async inscription() {
             const toast = useToast();
