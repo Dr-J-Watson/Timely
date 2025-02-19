@@ -7,19 +7,30 @@
           <div v-if="currentEntry">
             <div class="current-activity-header">
               <div>
-                <h3>{{ currentEntry.project.name }}</h3>
-                <p class="activity-name">{{ currentEntry.activity.name }}</p>
+                <h3>{{ currentEntry.project?.name }}</h3>
+                <p class="activity-name" :style="{ color: currentEntry.activity?.color }">
+                  {{ currentEntry.activity?.name }}
+                </p>
               </div>
-              <button 
-                @click="stopCurrentEntry"
-                class="btn btn-danger"
-              >
-                Arrêter
-              </button>
+              <div>
+                <button 
+                  v-if="currentEntry.end === '0000-00-00 00:00:00'"
+                  @click="stopCurrentEntry"
+                  class="btn btn-danger"
+                >
+                  Arrêter
+                </button>
+                <button 
+                  v-else
+                  @click="updateComment"
+                  class="btn btn-primary"
+                >
+                  Sauvegarder
+                </button>
+              </div>
             </div>
             <textarea
               v-model="currentComment"
-              @change="updateComment"
               placeholder="Ajouter des notes sur votre travail..."
               class="activity-notes"
             ></textarea>
@@ -41,6 +52,8 @@
               :entry="entry"
               @update="fetchEntries"
               @edit="editEntry"
+              @delete="deleteEntry"
+              @stop="stopEntry"
             />
           </div>
         </div>
@@ -146,7 +159,6 @@
   const currentEntry = ref(null)
   const todayEntries = ref([])
   const currentComment = ref('')
-  
   const objectives = ref([])
   const showObjectiveForm = ref(false)
   const newObjective = ref({
@@ -154,31 +166,79 @@
     content: ''
   })
   
+  const fetchProject = async (projectId) => {
+    try {
+      const response = await apiStore.apiInstance.get(`/api/projects/${projectId}`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching project:', error)
+      return null
+    }
+  }
+  
+  const fetchActivity = async (activityId) => {
+    try {
+      const response = await apiStore.apiInstance.get(`/api/activities/${activityId}`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching activity:', error)
+      return null
+    }
+  }
+  
   const fetchEntries = async () => {
     try {
       const today = new Date().toISOString().split('T')[0]
       const response = await apiStore.apiInstance.get(`/api/time-entries?from=${today}`)
-      todayEntries.value = response.data
-      currentEntry.value = todayEntries.value.find(entry => !entry.end)
-      if (currentEntry.value) {
-        currentComment.value = currentEntry.value.comment || ''
+      const entries = response.data
+  
+      const entriesWithDetails = await Promise.all(entries.map(async (entry) => {
+        const [project, activity] = await Promise.all([
+          fetchProject(entry.project_id),
+          fetchActivity(entry.activity_id)
+        ])
+        return {
+          ...entry,
+          project,
+          activity
+        }
+      }))
+  
+      todayEntries.value = entriesWithDetails
+      const currentAct = entriesWithDetails.find(entry => entry.end === "0000-00-00 00:00:00")
+      if (currentAct) {
+        currentEntry.value = currentAct
+        currentComment.value = currentAct.comment || ''
+      } else {
+        currentEntry.value = null
+        currentComment.value = ''
       }
     } catch (error) {
+      console.error('Error fetching entries:', error)
       toast.error('Erreur lors du chargement des entrées')
     }
   }
   
-  const fetchObjectives = async () => {
+  const stopEntry = async (entryId) => {
     try {
-      const response = await apiStore.apiInstance.get('/api/daily-objectives')
-      objectives.value = response.data
+      await apiStore.apiInstance.patch(`/api/time-entries/${entryId}/stop`)
+      toast.success('Activité arrêtée')
+      await fetchEntries()
     } catch (error) {
-      toast.error('Erreur lors du chargement des objectifs')
+      console.error('Error stopping entry:', error)
+      toast.error('Erreur lors de l\'arrêt de l\'activité')
     }
   }
   
-  const onEntryCreated = () => {
-    fetchEntries()
+  const deleteEntry = async (entryId) => {
+    try {
+      await apiStore.apiInstance.delete(`/api/time-entries/${entryId}`)
+      toast.success('Entrée supprimée')
+      await fetchEntries()
+    } catch (error) {
+      console.error('Error deleting entry:', error)
+      toast.error('Erreur lors de la suppression de l\'entrée')
+    }
   }
   
   const stopCurrentEntry = async () => {
@@ -187,8 +247,9 @@
     try {
       await apiStore.apiInstance.patch(`/api/time-entries/${currentEntry.value.id}/stop`)
       toast.success('Activité arrêtée')
-      fetchEntries()
+      await fetchEntries()
     } catch (error) {
+      console.error('Error stopping current entry:', error)
       toast.error('Erreur lors de l\'arrêt de l\'activité')
     }
   }
@@ -197,12 +258,28 @@
     if (!currentEntry.value) return
     
     try {
-      await apiStore.apiInstance.put(`/api/time-entries/${currentEntry.value.id}`, {
-        ...currentEntry.value,
+      const updatedEntry = {
+        project_id: currentEntry.value.project_id,
+        activity_id: currentEntry.value.activity_id,
         comment: currentComment.value
-      })
+      }
+  
+      await apiStore.apiInstance.put(`/api/time-entries/${currentEntry.value.id}`, updatedEntry)
+      toast.success('Commentaire mis à jour')
+      await fetchEntries()
     } catch (error) {
+      console.error('Error updating comment:', error)
       toast.error('Erreur lors de la mise à jour du commentaire')
+    }
+  }
+  
+  const fetchObjectives = async () => {
+    try {
+      const response = await apiStore.apiInstance.get('/api/daily-objectives')
+      objectives.value = response.data
+    } catch (error) {
+      console.error('Error fetching objectives:', error)
+      toast.error('Erreur lors du chargement des objectifs')
     }
   }
   
@@ -212,8 +289,9 @@
       toast.success('Objectif créé')
       showObjectiveForm.value = false
       newObjective.value = { name: '', content: '' }
-      fetchObjectives()
+      await fetchObjectives()
     } catch (error) {
+      console.error('Error creating objective:', error)
       toast.error('Erreur lors de la création de l\'objectif')
     }
   }
@@ -223,8 +301,9 @@
       await apiStore.apiInstance.patch(
         `/api/daily-objectives/${objective.id}/${objective.done ? 'undone' : 'done'}`
       )
-      fetchObjectives()
+      await fetchObjectives()
     } catch (error) {
+      console.error('Error toggling objective:', error)
       toast.error('Erreur lors de la mise à jour de l\'objectif')
     }
   }
@@ -235,15 +314,29 @@
     try {
       await apiStore.apiInstance.delete(`/api/daily-objectives/${id}`)
       toast.success('Objectif supprimé')
-      fetchObjectives()
+      await fetchObjectives()
     } catch (error) {
+      console.error('Error deleting objective:', error)
       toast.error('Erreur lors de la suppression de l\'objectif')
     }
   }
   
-  onMounted(() => {
-    fetchEntries()
-    fetchObjectives()
+  const onEntryCreated = async () => {
+        await fetchEntries()
+        // Recharger la page
+        window.location.reload()
+    }
+  
+  const editEntry = (entry) => {
+    currentEntry.value = entry
+    currentComment.value = entry.comment || ''
+  }
+  
+  onMounted(async () => {
+    await Promise.all([
+      fetchEntries(),
+      fetchObjectives()
+    ])
   })
   </script>
   
@@ -285,7 +378,6 @@
   }
   
   .activity-name {
-    color: var(--gray-700);
     margin-top: 0.25rem;
   }
   
@@ -357,6 +449,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 100;
   }
   
   .modal-content {

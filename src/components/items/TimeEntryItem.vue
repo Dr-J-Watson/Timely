@@ -2,9 +2,9 @@
     <div class="time-entry-item">
       <div class="time-entry-header">
         <div class="project-info">
-          <h3 class="project-name">{{ entry.project.name }}</h3>
-          <p class="activity-name" :style="{ color: entry.activity.color }">
-            {{ entry.activity.name }}
+          <h3 class="project-name">{{ entry.project?.name }}</h3>
+          <p class="activity-name" :style="{ color: entry.activity?.color }">
+            {{ entry.activity?.name }}
           </p>
         </div>
         <div class="time-info">
@@ -13,10 +13,12 @@
         </div>
       </div>
   
+      <p v-if="entry.comment" class="time-entry-comment">{{ entry.comment }}</p>
+  
       <div class="time-entry-actions">
         <button 
           v-if="!entry.end"
-          @click="stopEntry" 
+          @click="handleStop" 
           class="btn btn-danger btn-small"
         >
           Arrêter
@@ -28,21 +30,16 @@
           Modifier
         </button>
         <button 
-          @click="deleteEntry" 
+          @click="handleDelete" 
           class="btn btn-danger btn-small"
         >
           Supprimer
         </button>
       </div>
-  
-      <p v-if="entry.comment" class="time-entry-comment">{{ entry.comment }}</p>
     </div>
   </template>
   
   <script setup>
-  import { useApiStore } from '@/stores/api'
-  import { useToast } from 'vue-toastification'
-  
   const props = defineProps({
     entry: {
       type: Object,
@@ -50,53 +47,43 @@
     }
   })
   
-  const emit = defineEmits(['update', 'edit'])
-  const apiStore = useApiStore()
-  const toast = useToast()
+  const emit = defineEmits(['update', 'edit', 'delete'])
   
   const formatDate = (date) => {
-    return new Date(date).toLocaleTimeString()
+    if (!date) return ''
+    return new Date(date).toLocaleString('fr-FR')
   }
   
   const getDuration = () => {
-    const start = new Date(props.entry.start)
-    const end = props.entry.end ? new Date(props.entry.end) : new Date()
-    const diff = end - start
-    const minutes = Math.floor(diff / 60000)
-    const hours = Math.floor(minutes / 60)
-    const remainingMinutes = minutes % 60
-    return `${hours}h${remainingMinutes}m`
-  }
+  if (!props.entry.start) return '0h00m'
   
-  const stopEntry = async () => {
-    try {
-      await apiStore.apiInstance.patch(`/api/time-entries/${props.entry.id}/stop`)
-      emit('update')
-      toast.success('Entrée de temps arrêtée')
-    } catch (error) {
-      toast.error('Erreur lors de l\'arrêt de l\'entrée')
+  const start = new Date(props.entry.start)
+  const end = props.entry.end === "0000-00-00 00:00:00" ? new Date() : new Date(props.entry.end)
+  const diff = end - start
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(minutes / 60)
+  const remainingMinutes = minutes % 60
+  return `${hours}h${remainingMinutes.toString().padStart(2, '0')}m`
+}
+  
+  const handleDelete = () => {
+    if (confirm('Voulez-vous vraiment supprimer cette entrée ?')) {
+      emit('delete', props.entry.id)
     }
   }
   
-  const deleteEntry = async () => {
-    if (!confirm('Voulez-vous vraiment supprimer cette entrée de temps ?')) return
-    
-    try {
-      await apiStore.apiInstance.delete(`/api/time-entries/${props.entry.id}`)
-      emit('update')
-      toast.success('Entrée de temps supprimée')
-    } catch (error) {
-      toast.error('Erreur lors de la suppression de l\'entrée')
+  const handleStop = () => {
+    if (confirm('Voulez-vous arrêter cette entrée ?')) {
+      emit('stop', props.entry.id)
     }
   }
   </script>
   
   <style scoped>
   .time-entry-item {
-    border: 1px solid var(--gray-200);
+    background-color: white;
     border-radius: 8px;
     padding: 1rem;
-    background-color: white;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
   
@@ -138,17 +125,16 @@
     margin-top: 0.25rem;
   }
   
+  .time-entry-comment {
+    margin: 0.5rem 0;
+    font-size: 0.875rem;
+    color: var(--gray-700);
+  }
+  
   .time-entry-actions {
     display: flex;
     gap: 0.5rem;
-    margin: 0.5rem 0;
-  }
-  
-  .time-entry-comment {
-    margin: 0.5rem 0 0 0;
-    font-size: 0.875rem;
-    color: var(--gray-700);
-    white-space: pre-wrap;
+    margin-top: 0.5rem;
   }
   
   .btn-small {

@@ -68,9 +68,9 @@
           placeholder="Ajouter un commentaire..."
         ></textarea>
       </div>
-  
+
       <div class="form-actions">
-        <button
+        <button 
           type="button"
           @click="$emit('cancel')"
           class="btn btn-secondary"
@@ -114,7 +114,16 @@
     activity_id: '',
     start: '',
     end: '',
-    comment: ''
+    comment: '',
+    activity:{
+      color: '',
+      name: '',
+      description: ''
+    },
+    project:{
+      name: '',
+      description: ''
+    }
   })
   
   const isFormValid = computed(() => {
@@ -131,11 +140,11 @@
     try {
       // Chargement des projets
       const projectsResponse = await apiStore.apiInstance.get('/api/projects')
-      projects.value = projectsResponse.data.filter(p => p.active)
+      projects.value = projectsResponse.data.filter(p => p.is_enabled)
   
       // Chargement des activités
       const activitiesResponse = await apiStore.apiInstance.get('/api/activities')
-      activities.value = activitiesResponse.data.filter(a => a.active)
+      activities.value = activitiesResponse.data.filter(a => a.is_enabled)
   
       // Si on est en mode édition, on pré-remplit le formulaire
       if (props.entry) {

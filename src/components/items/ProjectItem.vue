@@ -11,10 +11,10 @@
           </button>
           <button 
             @click="toggleStatus" 
-            :class="project.active ? 'btn-danger' : 'btn-success'"
+            :class="project.is_enabled ? 'btn-danger' : 'btn-success'"
             class="btn btn-small"
           >
-            {{ project.active ? 'Désactiver' : 'Activer' }}
+            {{ project.is_enabled ? 'Désactiver' : 'Activer' }}
           </button>
         </div>
       </div>
@@ -39,10 +39,10 @@
   
   const toggleStatus = async () => {
     try {
-      const endpoint = props.project.active ? 'disable' : 'enable'
+      const endpoint = props.project.is_enabled ? 'disable' : 'enable'
       await apiStore.apiInstance.patch(`/api/projects/${props.project.id}/${endpoint}`)
       emit('update')
-      toast.success(`Projet ${props.project.active ? 'désactivé' : 'activé'} avec succès`)
+      toast.success(`Projet ${props.project.is_enabled ? 'désactivé' : 'activé'} avec succès`)
     } catch (error) {
       toast.error('Erreur lors de la modification du statut')
     }
