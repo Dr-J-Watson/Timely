@@ -37,7 +37,7 @@ npm run build
 docker compose -f docker-compose.dev.yml up -d
 ```
 
-### Compile and Minify for Production
+### Compile for Production
 
 ```sh
 docker compose up -d
