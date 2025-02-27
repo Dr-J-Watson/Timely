@@ -204,7 +204,7 @@ const handleVisibilityChange = () => {
 const fetchProjects = async () => {
   try {
     const response = await apiStore.apiInstance.get('/api/projects')
-    // projects.value = response.data.filter(p => p.is_enabled)
+    projects.value = response.data
   } catch (error) {
     console.error('Error fetching projects:', error)
     toast.error('Erreur lors du chargement des projets')
