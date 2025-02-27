@@ -43,9 +43,8 @@
   </template>
   
   <script setup>
-  import { ref, onMounted } from 'vue'
-  import { useApiStore } from '@/stores/api'
-  import { useToast } from 'vue-toastification'
+    import { useApiStore } from '@/stores/api'
+    import { useToast } from 'vue-toastification'
   
   const props = defineProps({
     activity: {

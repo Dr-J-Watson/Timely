@@ -2,39 +2,41 @@
     <div class="profile-settings">
       <h1 class="settings-title">Mon profil</h1>
       
-      <form @submit.prevent="updateProfile" class="profile-form">
-        <div class="form-group">
-          <label class="form-label">Nom complet</label>
-          <input
-            v-model="profile.name"
-            type="text"
-            required
-            class="form-input"
-            placeholder="Votre nom"
-          />
-        </div>
+      <div class="profile-box">
+        <form @submit.prevent="updateProfile" class="profile-form">
+          <div class="form-group">
+            <label class="form-label">Nom complet</label>
+            <input
+              v-model="profile.name"
+              type="text"
+              required
+              class="form-input"
+              placeholder="Votre nom complet"
+            />
+          </div>
   
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input
-            v-model="profile.email"
-            type="email"
-            required
-            class="form-input"
-            placeholder="Votre email"
-          />
-        </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input
+              v-model="profile.email"
+              type="email"
+              required
+              class="form-input"
+              placeholder="Votre adresse email"
+            />
+          </div>
   
-        <div class="form-actions">
-          <button
-            type="submit"
-            :disabled="isSubmitting"
-            class="btn btn-primary"
-          >
-            {{ isSubmitting ? 'Enregistrement...' : 'Enregistrer' }}
-          </button>
-        </div>
-      </form>
+          <div class="form-actions">
+            <button
+              type="submit"
+              :disabled="isSubmitting"
+              class="btn btn-primary"
+            >
+              {{ isSubmitting ? 'Enregistrement...' : 'Enregistrer' }}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </template>
   
@@ -60,16 +62,20 @@
         email: response.email
       }
     } catch (error) {
+      console.error('Error loading profile:', error)
       toast.error('Erreur lors du chargement du profil')
     }
   })
   
   const updateProfile = async () => {
+    if (isSubmitting.value) return
+    
     isSubmitting.value = true
     try {
       await apiStore.updateProfile(profile.value.name, profile.value.email)
       toast.success('Profil mis à jour avec succès')
     } catch (error) {
+      console.error('Error updating profile:', error)
       toast.error('Erreur lors de la mise à jour du profil')
     } finally {
       isSubmitting.value = false

@@ -5,6 +5,7 @@
           {{ isLogin ? 'Connexion' : 'Créer un compte' }}
         </h2>
   
+        <!-- Formulaire de connexion avec API Key -->
         <form v-if="isLogin" @submit.prevent="handleLogin" class="auth-form">
           <div class="form-group">
             <label class="form-label">Clé API</label>
@@ -26,6 +27,7 @@
           </button>
         </form>
   
+        <!-- Formulaire d'inscription -->
         <form v-else @submit.prevent="handleRegister" class="auth-form">
           <div class="form-group">
             <label class="form-label">Nom complet</label>
@@ -58,6 +60,7 @@
           </button>
         </form>
   
+        <!-- Séparateur et bouton de bascule -->
         <div class="auth-separator">
           <span class="separator-text">
             {{ isLogin ? "Pas encore de clé API ?" : "Vous avez déjà une clé API ?" }}
@@ -77,12 +80,12 @@
   <script setup>
   import { ref } from 'vue'
   import { useRouter } from 'vue-router'
-  import { useToast } from 'vue-toastification'
   import { useApiStore } from '@/stores/api'
+  import { useToast } from 'vue-toastification'
   
   const router = useRouter()
-  const toast = useToast()
   const apiStore = useApiStore()
+  const toast = useToast()
   
   const isLogin = ref(true)
   const isLoading = ref(false)

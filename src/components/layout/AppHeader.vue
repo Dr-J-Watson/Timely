@@ -1,3 +1,4 @@
+```vue
 <template>
   <header class="header">
     <div class="container header-content">
@@ -28,31 +29,32 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useApiStore } from '@/stores/api'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
+import { formatDuration } from '@/plugins/formatters'
 
 const router = useRouter()
-const route = useRoute()
 const apiStore = useApiStore()
 const toast = useToast()
 
 const currentEntry = ref(null)
 const todayTotalTime = ref('0h')
+let totalMs = ref(0)
 const completedObjectives = ref(0)
 const totalObjectives = ref(0)
-let durationInterval = null
-
-const formatDuration = (duration) => {
-  const hours = Math.floor(duration / 3600000)
-  const minutes = Math.floor((duration % 3600000) / 60000)
-  return `${hours}h${minutes.toString().padStart(2, '0')}m`
-}
+let updateInterval = null   
 
 const getCurrentDuration = () => {
   if (!currentEntry.value?.start) return 0
   return new Date() - new Date(currentEntry.value.start)
+}
+
+const updateDuration = () => {
+  if (currentEntry.value?.start) {
+    todayTotalTime.value = formatDuration(totalMs + getCurrentDuration())
+  }
 }
 
 const stopActivity = async () => {
@@ -82,7 +84,7 @@ const loadData = async () => {
       apiStore.apiInstance.get('/api/daily-objectives')
     ])
 
-    const currentAct = timeEntriesResponse.data.find(entry => entry.end === "0000-00-00 00:00:00")
+    const currentAct = timeEntriesResponse.data.find(entry => entry.end === null)
     
     if (currentAct) {
       const [project, activity] = await Promise.all([
@@ -95,14 +97,12 @@ const loadData = async () => {
         project: project.data,
         activity: activity.data
       }
-    } else {
-      currentEntry.value = null
     }
 
     const today = new Date().toISOString().split('T')[0]
     const todayEntries = timeEntriesResponse.data.filter(entry => entry.start.startsWith(today))
-    const totalMs = todayEntries.reduce((total, entry) => {
-      const end = entry.end && entry.end !== "0000-00-00 00:00:00" ? new Date(entry.end) : new Date()
+    totalMs = todayEntries.reduce((total, entry) => {
+      const end = entry.end && entry.end !== null ? new Date(entry.end) : new Date()
       const duration = end - new Date(entry.start)
       return total + duration
     }, 0)
@@ -116,33 +116,20 @@ const loadData = async () => {
   }
 }
 
-// Mise à jour de la durée toutes les minutes si une activité est en cours
-const startDurationInterval = () => {
-  if (durationInterval) clearInterval(durationInterval)
-  durationInterval = setInterval(() => {
-    if (currentEntry.value) {
-      getCurrentDuration()
-    }
-  }, 60000)
-}
-
-// Watcher pour recharger les données lors du changement de route
-watch(
-  () => route.path,
-  async () => {
-    await loadData()
-  }
-)
-
 onMounted(async () => {
   await loadData()
-  startDurationInterval()
+  // Mettre à jour la durée toutes les secondes
+  updateInterval = setInterval(() => {
+    updateDuration()
+  }, 1000)
 })
 
 onUnmounted(() => {
-  if (durationInterval) clearInterval(durationInterval)
+  if (updateInterval) {
+    clearInterval(updateInterval)
+  }
 })
-</script>   
+</script> 
 
 <style scoped>
 .header {

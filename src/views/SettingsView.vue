@@ -1,6 +1,7 @@
 <template>
     <div class="settings-container">
       <div class="settings-layout">
+        <!-- Barre latérale de navigation -->
         <aside class="settings-sidebar">
           <nav class="settings-nav">
             <router-link
@@ -15,6 +16,7 @@
           </nav>
         </aside>
   
+        <!-- Zone de contenu principale -->
         <main class="settings-content">
           <router-view></router-view>
         </main>

@@ -1,4 +1,12 @@
 <template>
+  <!DOCTYPE html>
+  <html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TIMELY BRUSON CLAIR</title>
+  </head>
+  </html>
   <div id="app">
     <AppHeader v-if="isAuthenticated"/>
     <router-view></router-view>

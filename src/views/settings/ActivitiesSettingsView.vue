@@ -10,6 +10,7 @@
         </button>
       </div>
   
+      <!-- Barre de recherche -->
       <div class="search-box">
         <input
           v-model="searchQuery"
@@ -19,6 +20,7 @@
         />
       </div>
   
+      <!-- Liste des activités -->
       <div class="activities-list">
         <div v-if="filteredActivities.length === 0" class="empty-state">
           Aucune activité trouvée
@@ -33,6 +35,7 @@
         />
       </div>
   
+      <!-- Modal formulaire activité -->
       <div v-if="showForm" class="modal-overlay">
         <div class="modal-content">
           <h2 class="modal-title">
@@ -65,6 +68,7 @@
   
   const filteredActivities = computed(() => {
     if (!searchQuery.value) return activities.value
+    
     const query = searchQuery.value.toLowerCase()
     return activities.value.filter(activity => 
       activity.name.toLowerCase().includes(query)
@@ -76,6 +80,7 @@
       const response = await apiStore.apiInstance.get('/api/activities')
       activities.value = response.data
     } catch (error) {
+      console.error('Error fetching activities:', error)
       toast.error('Erreur lors du chargement des activités')
     }
   }
@@ -95,7 +100,9 @@
     fetchActivities()
   }
   
-  onMounted(fetchActivities)
+  onMounted(() => {
+    fetchActivities()
+  })
   </script>
   
   <style scoped>
