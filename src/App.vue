@@ -1,15 +1,8 @@
 <template>
-  <!DOCTYPE html>
-  <html lang="fr">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIMELY BRUSON CLAIR</title>
-  </head>
-  </html>
   <div id="app">
     <AppHeader v-if="isAuthenticated"/>
     <router-view></router-view>
+    <AppFooter/>
   </div>
 </template>
 
@@ -17,6 +10,7 @@
 import { computed } from 'vue'
 import { useApiStore } from './stores/api'
 import AppHeader from './components/layout/AppHeader.vue'
+import AppFooter from './components/layout/AppFooter.vue'
 
 const apiStore = useApiStore()
 const isAuthenticated = computed(() => apiStore.isAuthenticated)

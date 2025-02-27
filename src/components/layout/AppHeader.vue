@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useApiStore } from '@/stores/api'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
@@ -45,6 +45,31 @@ const totalMs = ref(0)
 const completedObjectives = ref(0)
 const totalObjectives = ref(0)
 let updateInterval = null   
+
+
+const formatDurationForTitle = (ms) => {
+  const seconds = Math.floor((ms / 1000) % 60)
+  const minutes = Math.floor((ms / (1000 * 60)) % 60)
+  const hours = Math.floor(ms / (1000 * 60 * 60))
+  
+  if (hours > 0) {
+    return `${hours}h${minutes}m`
+  } else if (minutes > 0) {
+    return `${minutes}m${seconds}s`
+  } else {
+    return `${seconds}s`
+  }
+}
+
+const updatePageTitle = () => {
+  if (currentEntry.value) {
+    const duration = getCurrentDuration()
+    const durationForTitle = formatDurationForTitle(duration)
+    document.title = `${durationForTitle} - Timely`
+  } else {
+    document.title = 'Timely'
+  }
+}
 
 const fetchEntries = async () => {
   try {
@@ -70,6 +95,7 @@ const updateDuration = () => {
   if (currentEntry.value?.start) {
     fetchEntries()
     todayTotalTime.value = formatDuration(totalMs.value)
+    updatePageTitle()
   }
 }
 
@@ -78,6 +104,9 @@ const stopActivity = async () => {
     if (currentEntry.value?.id) {
       await apiStore.apiInstance.patch(`/api/time-entries/${currentEntry.value.id}/stop`)
       currentEntry.value = null
+
+      document.title = 'Timely BRUSON CLAIR'
+      
       toast.success('Activité arrêtée')
       window.location.reload()
     }
@@ -113,6 +142,8 @@ const loadData = async () => {
         project: project.data,
         activity: activity.data
       }
+    
+      updatePageTitle()
     }
 
     const today = new Date().toISOString().split('T')[0]
@@ -128,6 +159,14 @@ const loadData = async () => {
   }
 }
 
+watch(currentEntry, (newValue) => {
+  if (newValue) {
+    updatePageTitle()
+  } else {
+    document.title = 'Timely BRUSON CLAIR'
+  }
+})
+
 onMounted(async () => {
   await loadData()
   updateInterval = setInterval(() => {
@@ -139,6 +178,7 @@ onUnmounted(() => {
   if (updateInterval) {
     clearInterval(updateInterval)
   }
+  document.title = 'Timely BRUSON CLAIR'
 })
 </script> 
 
