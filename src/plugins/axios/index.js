@@ -13,7 +13,6 @@ export const createAxiosInstance = (apiKey) => {
     response => response,
     error => {
       if (error.response?.status === 401) {
-        // On émet un événement personnalisé pour la déconnexion
         window.dispatchEvent(new CustomEvent('unauthorized'))
       }
       return Promise.reject(error)
@@ -23,5 +22,4 @@ export const createAxiosInstance = (apiKey) => {
   return instance
 }
 
-// Export de l'instance par défaut (sans apiKey)
 export const axiosInstance = createAxiosInstance()

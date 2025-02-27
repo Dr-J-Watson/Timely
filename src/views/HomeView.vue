@@ -190,7 +190,6 @@ const newObjective = ref({
   content: ''
 })
 
-// Modification ici : initialisation des filtres avec la date du jour comme valeur par défaut
 const filters = ref({
   from: new Date().toISOString().split('T')[0],
   to: new Date().toISOString().split('T')[0]
@@ -220,10 +219,8 @@ const fetchActivity = async (activityId) => {
   }
 }
 
-// Modification ici : utilisation des filtres pour récupérer les entrées
 const fetchEntries = async () => {
   try {
-    // Utilisation des dates des filtres au lieu de la date du jour uniquement
     const params = new URLSearchParams({
       from: filters.value.from,
       to: filters.value.to
