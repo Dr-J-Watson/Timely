@@ -1,0 +1,16 @@
+  
+  
+services:
+
+  frontend.td7:
+    image : node:22
+
+    volumes:
+      - ./:/app
+      - /app/node_modules
+
+    working_dir: /app
+    ports:
+      - "56789:5173"
+
+    command: sh -c "npm install && npm run dev -- --host"

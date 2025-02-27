@@ -1,4 +1,5 @@
-# td7
+# Timely
+## Paul BRUSON - Mathieu CLAIR
 
 This template should help get you started developing with Vue 3 in Vite.
 
@@ -10,7 +11,7 @@ This template should help get you started developing with Vue 3 in Vite.
 
 See [Vite Configuration Reference](https://vite.dev/config/).
 
-## Project Setup
+## Project Setup with npm
 
 ```sh
 npm install
@@ -26,4 +27,18 @@ npm run dev
 
 ```sh
 npm run build
+```
+
+## Project Setup with Docker Compose
+
+### Compile and Hot-Reload for Development
+
+```sh
+docker compose -f docker-compose.dev.yml up -d
+```
+
+### Compile and Minify for Production
+
+```sh
+docker compose up -d
 ```
