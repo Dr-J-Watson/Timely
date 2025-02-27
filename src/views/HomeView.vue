@@ -398,7 +398,7 @@ onMounted(async () => {
   border-radius: 8px;
   padding: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1rem; /* Ajout d'une marge pour séparer du filtre */
+  margin-bottom: 1rem;
 }
 
 .filters-section {

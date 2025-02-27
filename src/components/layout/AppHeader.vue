@@ -1,4 +1,3 @@
-```vue
 <template>
   <header class="header">
     <div class="container header-content">
@@ -34,6 +33,7 @@ import { useApiStore } from '@/stores/api'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import { formatDuration } from '@/plugins/formatters'
+import { calculateTotalDuration } from '@/plugins/utils/timeCalculator'
 
 const router = useRouter()
 const apiStore = useApiStore()
@@ -41,10 +41,25 @@ const toast = useToast()
 
 const currentEntry = ref(null)
 const todayTotalTime = ref('0h')
-let totalMs = ref(0)
+const totalMs = ref(0)
 const completedObjectives = ref(0)
 const totalObjectives = ref(0)
 let updateInterval = null   
+
+const fetchEntries = async () => {
+  try {
+    const response = await apiStore.apiInstance.get('/api/time-entries')
+
+    const today = new Date().toISOString().split('T')[0]
+    const todayEntries = response.data.filter(entry => entry.start.startsWith(today))
+    totalMs.value = calculateTotalDuration(todayEntries)
+
+    todayTotalTime.value = formatDuration(totalMs.value)
+  } catch (error) {
+    console.error('Error fetching entries:', error)
+    toast.error('Erreur lors du chargement des données')
+  }
+}
 
 const getCurrentDuration = () => {
   if (!currentEntry.value?.start) return 0
@@ -53,7 +68,8 @@ const getCurrentDuration = () => {
 
 const updateDuration = () => {
   if (currentEntry.value?.start) {
-    todayTotalTime.value = formatDuration(totalMs + getCurrentDuration())
+    fetchEntries()
+    todayTotalTime.value = formatDuration(totalMs.value)
   }
 }
 
@@ -101,13 +117,9 @@ const loadData = async () => {
 
     const today = new Date().toISOString().split('T')[0]
     const todayEntries = timeEntriesResponse.data.filter(entry => entry.start.startsWith(today))
-    totalMs = todayEntries.reduce((total, entry) => {
-      const end = entry.end && entry.end !== null ? new Date(entry.end) : new Date()
-      const duration = end - new Date(entry.start)
-      return total + duration
-    }, 0)
+    totalMs.value = calculateTotalDuration(todayEntries)
 
-    todayTotalTime.value = formatDuration(totalMs)
+    todayTotalTime.value = formatDuration(totalMs.value)
     totalObjectives.value = objectivesResponse.data.length
     completedObjectives.value = objectivesResponse.data.filter(obj => obj.done).length
   } catch (error) {
@@ -118,7 +130,6 @@ const loadData = async () => {
 
 onMounted(async () => {
   await loadData()
-  // Mettre à jour la durée toutes les secondes
   updateInterval = setInterval(() => {
     updateDuration()
   }, 1000)
