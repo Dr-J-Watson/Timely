@@ -25,6 +25,19 @@
               placeholder="Votre adresse email"
             />
           </div>
+
+          <div class="form-group">
+            <label class="form-label
+            ">Clé d'API</label>
+            <input
+              v-model="apiStore.apiKey"
+              type="text"
+              required
+              class="form-input"
+              placeholder="Votre clé d'API"
+              disabled
+            />
+          </div>
   
           <div class="form-actions">
             <button

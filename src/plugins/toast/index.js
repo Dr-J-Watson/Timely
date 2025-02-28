@@ -3,13 +3,13 @@ import "vue-toastification/dist/index.css"
 
 export const toastOptions = {
     position: POSITION.BOTTOM_RIGHT,
-    timeout: 5000,
-    closeOnClick: true,
+    timeout: 10000,
+    closeOnClick: false,
     pauseOnFocusLoss: true,
     pauseOnHover: true,
     draggable: true,
     draggablePercent: 0.6,
-    showCloseButtonOnHover: false,
+    showCloseButtonOnHover: true,
     hideProgressBar: false,
     closeButton: "button",
     icon: true,

@@ -127,6 +127,9 @@
       )
       if (success) {
         toast.success('Compte créé avec succès')
+        navigator.clipboard.writeText(apiStore.apiKey)
+        toast.info('Clé API copiée dans le presse-papiers')
+        toast.info('Vous pouvez retrouver votre clé API dans vos paramètres')
         router.push('/')
       }
     } catch (error) {
