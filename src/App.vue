@@ -17,6 +17,10 @@ const isAuthenticated = computed(() => apiStore.isAuthenticated)
 </script>
 
 <style>
+* {
+  box-sizing: border-box;
+}
+
 :root {
   --primary-color: #4F46E5;
   --error-color: #EF4444;
