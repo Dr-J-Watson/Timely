@@ -31,3 +31,4 @@ coverage
 
 .vite/
 package-lock.json
+release
